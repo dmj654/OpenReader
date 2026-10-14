@@ -1,0 +1,87 @@
+name: Build unsigned IPA
+
+# 触发方式：推送到任意分支、打 tag、或在 Actions 页面手动点 "Run workflow"
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  build:
+    name: Build OpenReader.ipa (unsigned)
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version || true
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate --spec project.yml
+
+      - name: Show targets
+        run: xcodebuild -list -project OpenReader.xcodeproj
+
+      - name: Build (Release, arm64, unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project OpenReader.xcodeproj \
+            -scheme OpenReader \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            2>&1 | tail -n 200
+
+      - name: Package into Payload/OpenReader.app
+        run: |
+          set -euo pipefail
+          APP_PATH="build/Build/Products/Release-iphoneos/OpenReader.app"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "::error::找不到构建产物 $APP_PATH"
+            find build/Build/Products -maxdepth 3 -name "*.app" -print || true
+            exit 1
+          fi
+          rm -rf Payload dist
+          mkdir -p Payload dist
+          cp -R "$APP_PATH" Payload/
+          echo "--- App bundle 内容 ---"
+          ls -la Payload/OpenReader.app
+          echo "--- 架构信息 ---"
+          lipo -info Payload/OpenReader.app/OpenReader || true
+          /usr/bin/zip -qry "dist/OpenReader-unsigned.ipa" Payload
+          echo "--- 产物 ---"
+          ls -lh dist/
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenReader-unsigned-ipa
+          path: dist/OpenReader-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 90

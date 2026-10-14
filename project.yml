@@ -1,0 +1,47 @@
+name: OpenReader
+options:
+  bundleIdPrefix: com.pcxx
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  base:
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.9"
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+    SWIFT_STRICT_CONCURRENCY: minimal
+    ALWAYS_SEARCH_USER_PATHS: "NO"
+
+targets:
+  OpenReader:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: OpenReader
+        excludes:
+          - "Info.plist"
+      - path: OpenReader/Info.plist
+        buildPhase: none
+    settings:
+      base:
+        PRODUCT_NAME: OpenReader
+        PRODUCT_BUNDLE_IDENTIFIER: com.pcxx.openreader
+        INFOPLIST_FILE: OpenReader/Info.plist
+        GENERATE_INFOPLIST_FILE: "NO"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_MACCATALYST: "NO"
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: "NO"
+        SWIFT_EMIT_LOC_STRINGS: "YES"
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+    scheme:
+      gatherCoverageData: false
+      testTargets: []
