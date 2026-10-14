@@ -71,7 +71,7 @@ enum EpubParser {
 
         // 3. 抽出所有图片，供渲染期内联为 data URI
         var imageMap: [String: String] = [:]
-        for name in archive.entryNames where imageExtensions.contains(name.pathExtension.lowercased()) {
+        for name in archive.entryNames where imageExtensions.contains((name as NSString).pathExtension.lowercased()) {
             guard let data = archive.data(forFile: name) else { continue }
             let sanitized = name.replacingOccurrences(of: "/", with: "_")
             let target = imagesDirectory.appendingPathComponent(sanitized)
@@ -109,7 +109,7 @@ enum EpubParser {
         for idref in opfDelegate.spineIDRefs {
             guard let item = opfDelegate.manifest[idref] else { continue }
             let mediaType = item.mediaType.lowercased()
-            let ext = item.href.pathExtension.lowercased()
+            let ext = (item.href as NSString).pathExtension.lowercased()
             let isDocument = mediaType.contains("html") || ["xhtml", "html", "htm"].contains(ext)
             guard isDocument else { continue }
 
@@ -159,7 +159,7 @@ enum EpubParser {
         }
         if candidatePath == nil {
             candidatePath = archive.entryNames.first {
-                imageExtensions.contains($0.pathExtension.lowercased()) &&
+                imageExtensions.contains(($0 as NSString).pathExtension.lowercased()) &&
                     $0.lowercased().contains("cover")
             }
         }
@@ -297,7 +297,7 @@ enum EpubParser {
     static func removePattern(from text: String, pattern: String) -> String {
         guard let regex = try? NSRegularExpression(pattern: pattern) else { return text }
         let range = NSRange(text.startIndex..., in: text)
-        return regex.stringByReplacingMatches(in: text, options: [], range: range, with: "")
+        return regex.stringByReplacingMatches(in: text, options: [], range: range, withTemplate: "")
     }
 
     private static func extractTitle(from html: String) -> String? {
@@ -317,7 +317,7 @@ enum EpubParser {
 private extension String {
     var xmlLocalName: String {
         if let index = firstIndex(of: ":") {
-            return String(self[index(after: index)...])
+            return String(self[self.index(after: index)...])
         }
         return self
     }
