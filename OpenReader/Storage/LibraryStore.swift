@@ -141,7 +141,9 @@ final class LibraryStore: ObservableObject {
         }) else { return }
         bookmarks.append(bookmark)
         persistBookmarks()
-    }    func removeBookmark(_ bookmark: Bookmark) {
+    }
+
+    func removeBookmark(_ bookmark: Bookmark) {
         bookmarks.removeAll { $0.id == bookmark.id }
         persistBookmarks()
     }
