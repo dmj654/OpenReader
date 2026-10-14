@@ -17,6 +17,9 @@ struct SettingsScreen: View {
                 aboutSection
             }
             .navigationTitle("设置")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(Palette.accent, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .onAppear { storageSize = FileStore.occupiedBytes() }
         }
     }

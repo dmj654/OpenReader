@@ -61,8 +61,9 @@ struct ReaderTheme: Identifiable, Codable, Hashable {
 
 /// App 界面色板（区别于阅读页主题）
 enum Palette {
-    static let accent = Color(red: 0.18, green: 0.45, blue: 0.59)
-    static let shelfBackground = Color(uiColor: .systemGroupedBackground)
+    /// 开源阅读（Legado）经典绿 #009688
+    static let accent = Color(red: 0.0, green: 0.588, blue: 0.533)
+    static let shelfBackground = Color(uiColor: .systemBackground)
 
     static func coverBackground(for seed: String) -> Color {
         let palette: [Color] = [

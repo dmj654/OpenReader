@@ -55,19 +55,61 @@ struct BookshelfScreen: View {
         return result
     }
 
+    // MARK: - 分组筛选条
+
+    private var showGroupChips: Bool {
+        !library.groups.isEmpty && !library.books.isEmpty
+    }
+
+    private var groupChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                filterChip("全部", selected: groupFilter == nil)
+                ForEach(library.groups, id: \.self) { group in
+                    filterChip(group, selected: groupFilter == group)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+        }
+        .background(Palette.shelfBackground)
+        .accessibilityElement(children: .contain)
+    }
+
+    private func filterChip(_ title: String, selected: Bool) -> some View {
+        Button {
+            groupFilter = (title == "全部") ? nil : title
+        } label: {
+            Text(title)
+                .font(.subheadline.weight(.medium))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+                .background(Capsule().fill(selected ? Palette.accent : Color.secondary.opacity(0.12)))
+                .foregroundStyle(selected ? .white : .primary)
+        }
+        .accessibilityLabel("分组 \(title)")
+    }
+
     var body: some View {
         NavigationStack {
-            Group {
-                if library.books.isEmpty {
-                    emptyState
-                } else if isGrid {
-                    gridView
-                } else {
-                    listView
+            VStack(spacing: 0) {
+                if showGroupChips { groupChips }
+                Group {
+                    if library.books.isEmpty {
+                        emptyState
+                    } else if isGrid {
+                        gridView
+                    } else {
+                        listView
+                    }
                 }
+                .background(Palette.shelfBackground)
             }
             .background(Palette.shelfBackground)
             .navigationTitle("书架")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(Palette.accent, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .searchable(text: $query, prompt: "搜索书名或作者")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -78,19 +120,10 @@ struct BookshelfScreen: View {
                         } label: {
                             Label("用书源搜书", systemImage: "magnifyingglass")
                         }
-                        Picker("分组", selection: Binding(
-                            get: { groupFilter ?? "全部" },
-                            set: { groupFilter = $0 == "全部" ? nil : $0 }
-                        )) {
-                            Text("全部分组").tag("全部")
-                            ForEach(library.groups, id: \.self) { group in
-                                Text(group).tag(group)
-                            }
-                        }
                     } label: {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
+                        Image(systemName: "ellipsis.circle")
                     }
-                    .accessibilityLabel("筛选")
+                    .accessibilityLabel("更多操作")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -301,6 +334,22 @@ struct BookCell: View {
                             .padding(5)
                     }
                 }
+                .overlay(alignment: .bottom) {
+                    if let progress, progress.percent > 0 {
+                        GeometryReader { geo in
+                            Capsule()
+                                .fill(Color.white.opacity(0.35))
+                                .frame(height: 3)
+                                .overlay(alignment: .leading) {
+                                    Capsule()
+                                        .fill(Palette.accent)
+                                        .frame(width: geo.size.width * CGFloat(progress.percent), height: 3)
+                                }
+                        }
+                        .frame(height: 3)
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
 
             Text(book.title)
@@ -406,6 +455,14 @@ struct CoverView: View {
                         .padding(10)
                     )
             }
+        }
+        .overlay(alignment: .leading) {
+            LinearGradient(
+                colors: [Color.black.opacity(0.22), Color.black.opacity(0)],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .frame(width: 12)
         }
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .task(id: book.coverFileName) {

@@ -21,6 +21,9 @@ struct BookSourceListScreen: View {
             }
             .background(Palette.shelfBackground)
             .navigationTitle("书源")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(Palette.accent, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .navigationDestination(isPresented: $showSearch) {
                 NetworkSearchScreen()
             }
