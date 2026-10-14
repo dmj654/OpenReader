@@ -183,12 +183,12 @@ final class ZipArchive {
 
     private func readUInt32(_ offset: Int) -> UInt32 {
         guard offset + 4 <= raw.count else { return 0 }
-        return readUInt16(offset) | (readUInt16(offset + 2) << 16)
+        return UInt32(readUInt16(offset)) | (UInt32(readUInt16(offset + 2)) << 16)
     }
 
     private func readUInt64(_ offset: Int) -> UInt64 {
         guard offset + 8 <= raw.count else { return 0 }
-        return readUInt32(offset) | (UInt64(readUInt32(offset + 4)) << 32)
+        return UInt64(readUInt32(offset)) | (UInt64(readUInt32(offset + 4)) << 32)
     }
 
     private func decodeName(at offset: Int, length: Int, flags: UInt16) -> String {
