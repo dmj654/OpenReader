@@ -1,0 +1,34 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcodeproj
+*.xcworkspace
+!*.xcodeproj/project.xcworkspace
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.mobileprovision
+*.p12
+
+# XcodeGen 产物（由 project.yml 生成，不入库）
+OpenReader.xcodeproj/
+
+# Swift Package Manager
+.swiftpm/
+.build/
+Packages/
+
+# 本地产物
+dist/
+Payload/
+
+# WorkBuddy 内部目录（记忆/配置，不入库）
+.workbuddy/
